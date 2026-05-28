@@ -1,0 +1,71 @@
+type: task
+name: review-scam-classifier-worker
+
+python: "3.12"
+
+files:
+  - requirements.txt:/workflow/requirements.txt
+  - processor.py:/workflow/processor.py
+  - processor_config.py:/workflow/processor_config.py
+  - processor_utils.py:/workflow/processor_utils.py
+  - core.py:/workflow/core.py
+  - pyproject.toml:/workflow/pyproject.toml
+  - review_classifier:/workflow/review_classifier
+
+spot_policy: auto
+
+max_price: 0.25
+
+env:
+  # Queue
+  - QUEUE_URL
+  - QUEUE_API_KEY
+  - QUEUE_KEY
+  - BATCH_SIZE
+  - EMPTY_QUEUE_SLEEP_SECONDS
+
+  # Hugging Face
+  - HF_TOKEN
+  - REVIEW_CLASSIFIER_HF_REPO_ID
+  - REVIEW_CLASSIFIER_SUBFOLDER
+  - REVIEW_CLASSIFIER_HF_TOKEN
+
+  # Runtime
+  - REVIEW_CLASSIFIER_MAX_LENGTH
+  - REVIEW_CLASSIFIER_NO_4BIT
+  - REVIEW_CLASSIFIER_CACHE_POLICY
+
+  # Output shape
+  - REVIEW_CLASSIFIER_INCLUDE_PROBABILITIES
+  - REVIEW_CLASSIFIER_INCLUDE_LABEL_IDS
+  - REVIEW_CLASSIFIER_OVERWRITE_PREDICTION_ID
+
+  # One-word review mapping
+  - REVIEW_CLASSIFIER_APPLY_ONE_WORD_MAPPING
+  - REVIEW_CLASSIFIER_FORCE_UNKNOWN_SINGLE_WORD_CLEAN
+
+  # Queue identity behavior
+  - REVIEW_CLASSIFIER_REQUIRE_REVIEW_ID
+  - REVIEW_CLASSIFIER_DUPLICATE_REVIEW_ID_POLICY
+
+  # CUDA memory fragmentation mitigation
+  - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+commands:
+  - cd /workflow
+  - pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cu128
+  - pip install --no-cache-dir -r requirements.txt
+  - pip install --no-cache-dir bitsandbytes --upgrade
+  - pip install --no-cache-dir .
+  - python3 processor.py
+
+resources:
+  gpu:
+    memory: 24GB
+    # name: ["A4000", "A4500", "A5000", "A6000", "RTX4090", "RTX4000Ada", "L4", "L40", "L40S"]
+
+idle_duration: 6h
+
+retry:
+  on_events: [no-capacity, error, interruption]
+  duration: 2d

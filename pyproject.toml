@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "review-scam-classifier"
+version = "0.1.0"
+description = "Inference and queue worker for Hugging Face PEFT scam-review classifier adapters."
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate>=0.30",
+    "bitsandbytes>=0.43",
+    "huggingface_hub>=0.23",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "peft>=0.11",
+    "requests>=2.31",
+    "sentencepiece>=0.2",
+    "torch>=2.1",
+    "transformers>=4.41",
+]
+
+[tool.setuptools]
+packages = ["review_classifier"]

@@ -1,0 +1,10 @@
+accelerate>=0.30
+bitsandbytes
+huggingface_hub
+numpy
+pandas
+peft
+requests
+sentencepiece
+torch
+transformers>=4.41
